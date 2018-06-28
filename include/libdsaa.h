@@ -32,7 +32,7 @@ int list_move(struct list*, void* i, list_item_position, void*);
 int list_remove(struct list*, void*);
 int list_print(struct list*, list_item_position);
 int list_release(struct list*);
-
+int list_get(struct list*, void*, void**);
 
 
 #endif

@@ -280,3 +280,23 @@ int list_release(struct list *l) {
 }
 
 /*****************************************************************************/
+
+int list_get(struct list *l, void* f, void** list_data) {
+
+	if(l->function->find == NULL) {
+	  return -1;
+	}
+
+	struct list_item* item = l->head;
+	while(item != NULL) {
+		if(l->function->find(item->data, f) == 1) {
+	        *list_data = item->data;
+	        return 1;
+	    }
+	    item = item->next;
+	}
+	return 0;
+}
+
+/*****************************************************************************/
+
