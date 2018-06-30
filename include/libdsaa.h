@@ -14,7 +14,7 @@ struct list_function {
 	void (*print)(int, void*);
 	void (*release)(void*);
 	int (*find)(void*, void*);
-	void (*update)(void*, void*);
+	void (*update)(void*, void*, void*);
 };
 
 struct list {
@@ -28,7 +28,7 @@ void list_init(struct list*, struct list_function*);
 int list_add(struct list*, void*);
 int list_add_sort(struct list*, void*);
 int list_find(struct list*, void*);
-int list_move(struct list*, void* i, list_item_position, void*);
+int list_move(struct list*, void* i, list_item_position, void*, void*);
 int list_remove(struct list*, void*);
 int list_print(struct list*, list_item_position);
 int list_release(struct list*);

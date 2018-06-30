@@ -114,7 +114,7 @@ int list_find(struct list *l, void* f) {
 
 /*****************************************************************************/
 
-int list_move(struct list *l, void* i, list_item_position p, void* v) {
+int list_move(struct list *l, void* i, list_item_position p, void* v, void* d) {
 
     if(l->function->find == NULL) {
 	  return -1;
@@ -152,7 +152,7 @@ int list_move(struct list *l, void* i, list_item_position p, void* v) {
         	}
 
     	    if(l->function->update != NULL) {
-    	    	l->function->update(item->data, v);
+    	    	l->function->update(item->data, v, d);
     	    }
 
     	    return 1;
