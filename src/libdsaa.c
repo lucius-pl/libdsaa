@@ -300,3 +300,164 @@ int list_get(struct list *l, void* f, void** list_data) {
 
 /*****************************************************************************/
 
+int list_update(struct list *l, void* i, void* v, void* d) {
+
+	if(l->function->find == NULL) {
+	  return -1;
+	}
+
+	if(l->function->compare == NULL) {
+	  return -1;
+	}
+
+	if(l->function->update == NULL) {
+	  return -1;
+	}
+
+	struct list_item* found = NULL;
+    struct list_item* item = l->head;
+    while(item != NULL) {
+        if(l->function->find(item->data, i) == 1) {
+        	l->function->update(item->data, v, d);
+        	found = item;
+        	break;
+        }
+        item = item->next;
+    }
+
+    if(found == NULL) {
+    	return 0;
+    }
+
+    if(found == l->head) {
+    	item = l->head->next;
+    	while(item != NULL ) {
+    		if(l->function->compare(item->data, found->data) >= 0) {
+    			break;
+    		}
+    		item = item->next;
+    	}
+
+    	/* after tail */
+    	if(item == NULL) {
+        	l->head = found->next;
+        	l->head->previous = NULL;
+
+        	l->tail->next = found;
+    		found->next = NULL;
+    		found->previous = l->tail;
+    		l->tail = found;
+    	} else {
+    		/* after one element after head */
+    		if(item != l->head->next) {
+    	    	l->head = found->next;
+    	    	l->head->previous = NULL;
+
+    	    	item->previous->next = found;
+    	    	item->previous = found;
+    	    	found->previous = item->previous->next;
+    	    	found->next = item;
+    		}
+    	}
+    } else if (found == l->tail) {
+    	item = l->tail->previous;
+    	while(item != NULL ) {
+    	    if(l->function->compare(item->data, found->data) <= 0) {
+    	       break;
+    	    }
+    	    item = item->previous;
+    	}
+
+    	/* before head */
+    	if(item == NULL) {
+        	l->tail = found->previous;
+        	l->tail->next = NULL;
+
+        	l->head->previous = found;
+        	found->previous = NULL;
+    	    found->next = l->head;
+    	    l->head = found;
+    	} else {
+    		/* before one element before tail */
+    	    if(item != l->tail->previous) {
+    	    	l->tail = found->previous;
+    	    	l->tail->next = NULL;
+
+    	    	found->previous = item;
+    	    	found->next = item->next;
+    	    	item->next->previous = found;
+    	    	item->next = found;
+    	    }
+    	}
+    } else {
+
+    	/* up */
+    	if(l->function->compare(found->data, found->next->data) > 0) {
+    		item = found->next;
+    		while(item != NULL ) {
+    			if(l->function->compare(item->data, found->data) >= 0) {
+    		        break;
+    		    }
+    		    item = item->next;
+    		}
+
+    		/* after tail */
+    		if(item == NULL) {
+
+    			found->previous->next = found->next;
+    			found->next->previous = found->previous;
+
+    			l->tail->next = found;
+				found->next = NULL;
+				found->previous = l->tail;
+				l->tail = found;
+
+			} else {
+				/* after one element after found */
+
+				found->previous->next = found->next;
+    			found->next->previous = found->previous;
+
+				item->previous->next = found;
+				item->previous = found;
+				found->previous = item->previous->next;
+				found->next = item;
+			}
+
+    	/* down */
+    	} else if (l->function->compare(found->data, found->previous->data) < 0) {
+    		item = found->previous;
+    		while(item != NULL ) {
+    		    if(l->function->compare(item->data, found->data) <= 0) {
+    		        break;
+    		    }
+    		    item = item->previous;
+    		}
+
+    		/* before head */
+			if(item == NULL) {
+    			found->previous->next = found->next;
+    			found->next->previous = found->previous;
+
+				l->head->previous = found;
+				found->previous = NULL;
+				found->next = l->head;
+				l->head = found;
+			} else {
+	    		/* before one element before found */
+
+				found->previous->next = found->next;
+	    		found->next->previous = found->previous;
+
+	    	    found->previous = item;
+	    	    found->next = item->next;
+	    	    item->next->previous = found;
+	    	    item->next = found;
+	    	}
+    	}
+    }
+
+    return 1;
+}
+
+/*****************************************************************************/

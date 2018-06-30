@@ -33,6 +33,6 @@ int list_remove(struct list*, void*);
 int list_print(struct list*, list_item_position);
 int list_release(struct list*);
 int list_get(struct list*, void*, void**);
-
+int list_update(struct list*, void*, void*, void*);
 
 #endif
