@@ -310,15 +310,13 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 	  return -1;
 	}
 
-	if(l->function->update == NULL) {
-	  return -1;
-	}
-
 	struct list_item* found = NULL;
     struct list_item* item = l->head;
     while(item != NULL) {
         if(l->function->find(item->data, i) == 1) {
-        	l->function->update(item->data, v, d);
+        	if(l->function->update != NULL) {
+        		l->function->update(item->data, v, d);
+        	}
         	found = item;
         	break;
         }
