@@ -281,7 +281,22 @@ int list_release(struct list *l) {
 
 /*****************************************************************************/
 
-int list_get(struct list *l, void* f, void** list_data) {
+int list_get(struct list *l, list_item_position p, void** list_data) {
+
+	if(p == list_item_first) {
+	    *list_data = l->head->data;
+		return 1;
+	} else if (p == list_item_last) {
+		*list_data = l->tail->data;
+		return 1;
+	}
+
+	return 0;
+}
+
+/*****************************************************************************/
+
+int list_get_find(struct list *l, void* f, void** list_data) {
 
 	if(l->function->find == NULL) {
 	  return -1;
