@@ -2,7 +2,7 @@
 CC = gcc
 OBJ = libdsaa.o
 SRC = src/libdsaa.c
-CFLAGS = -O2 -fPIC
+CFLAGS = -O2 -fPIC -Wall
 LDFLAGS = -shared
 TARGET = libdsaa.so
 BUILD_DIR = build
