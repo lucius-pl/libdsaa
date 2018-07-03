@@ -164,38 +164,37 @@ int list_move(struct list *l, void* i, list_item_position p, void* v, void* d) {
 
 /*****************************************************************************/
 
-int list_remove(struct list *l, void *p) {
+int list_remove(struct list *l, list_item_position p) {
 
 	if(l->head == NULL) {
-		return -1;
+			return -1;
 	}
 
-	if( *(list_item_position*)p == list_item_first) {
-
+	if(p == list_item_first) {
 		if(l->function->release != NULL) {
-	        l->function->release(l->head->data);
-	    }
+			l->function->release(l->head->data);
+		}
 
 		if(l->head->next == NULL) {
 		  free(l->head);
 		  l->head = l->tail = NULL;
 		} else {
 		  l->head = l->head->next;
-	      free(l->head->previous);
-	      l->head->previous = NULL;
+		  free(l->head->previous);
+		  l->head->previous = NULL;
 		}
 
-	    l->size--;
-	    return 1;
+		l->size--;
+		return 1;
 
-	} else if(*(list_item_position*)p == list_item_last) {
+	} else if(p == list_item_last) {
 
 		if(l->function->release != NULL) {
-	        l->function->release(l->tail->data);
-	    }
+			l->function->release(l->tail->data);
+		}
 
 		if(l->tail->previous == NULL) {
-		    free(l->tail);
+			free(l->tail);
 			l->head = l->tail = NULL;
 		} else {
 			l->tail = l->tail->previous;
@@ -205,35 +204,57 @@ int list_remove(struct list *l, void *p) {
 
 		l->size--;
 		return 1;
+	}
 
-	} else {
+	return 0;
+}
 
-	    if(l->function->find == NULL) {
-		  return -1;
+/*****************************************************************************/
+
+int list_remove_find(struct list *l, void *p) {
+
+	/* 0 items */
+	if(l->head == NULL) {
+		return -1;
+	}
+
+	/* 1 item */
+	if(l->head == l->tail) {
+	    free(l->head);
+		l->head = l->tail = NULL;
+		return 1;
+	}
+
+	/* n items */
+	if(l->function->find == NULL) {
+	  return -1;
+	}
+
+	struct list_item* item = l->head;
+	while(item != NULL) {
+		if(l->function->find(item->data, p) == 1) {
+
+			if(l->function->release != NULL) {
+			    l->function->release(item->data);
+		    }
+
+		    if(item == l->head) {
+		    	l->head = l->head->next;
+		    	l->head->previous = NULL;
+		    } else if(item == l->tail) {
+		    	l->tail = l->tail->previous;
+				l->tail->next = NULL;
+		    } else {
+			    item->previous->next = item->next;
+			    item->next->previous = item->previous;
+		    }
+
+		    free(item);
+
+		    l->size--;
+		    return 1;
 		}
-
-		struct list_item* item = l->head;
-		while(item != NULL) {
-		    if(l->function->find(item->data, p) == 1) {
-
-			   if(l->function->release != NULL) {
-				   l->function->release(item->data);
-			   }
-
-			   if(item->next != NULL && item->previous != NULL ) {
-			       item->previous->next = item->next;
-				   item->next->previous = item->previous;
-			   } else {
-				   l->head = NULL;
-				   l->tail = NULL;
-			   }
-			   free(item);
-
-			   l->size--;
-		       return 1;
-			 }
-			 item = item->next;
-		}
+		item = item->next;
 	}
 
     return 0;
