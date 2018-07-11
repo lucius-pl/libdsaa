@@ -24,6 +24,8 @@ struct list {
 	int size;
 };
 
+void list_debug(int);
+void list_debug_log(const char*, ...);
 void list_init(struct list*, struct list_function*);
 int list_add(struct list*, void*);
 int list_add_sort(struct list*, void*);
