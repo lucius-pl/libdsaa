@@ -438,10 +438,12 @@ int list_update(struct list *l, void* i, void* v, void* d) {
     	    	l->head = found->next;
     	    	l->head->previous = NULL;
 
+    	    	found->previous = item->previous;
+    	    	found->next = item;
+
     	    	item->previous->next = found;
     	    	item->previous = found;
-    	    	found->previous = item->previous->next;
-    	    	found->next = item;
+
     	    	list_debug_log("list_update: item moved after one element after head\n");
     		}
     	}
@@ -473,8 +475,10 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 
     	    	found->previous = item;
     	    	found->next = item->next;
+
     	    	item->next->previous = found;
     	    	item->next = found;
+
     	    	list_debug_log("list_update: item moved before one element before tail\n");
     	    }
     	}
@@ -502,16 +506,18 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 				l->tail = found;
 
 				list_debug_log("list_update: item moved after tail\n");
+
 			} else {
 				/* after one element after found */
 
 				found->previous->next = found->next;
     			found->next->previous = found->previous;
 
-				item->previous->next = found;
-				item->previous = found;
-				found->previous = item->previous->next;
+				found->previous = item->previous;
 				found->next = item;
+
+    			item->previous->next = found;
+				item->previous = found;
 
 				list_debug_log("list_update: item moved after one element after found\n");
 			}
