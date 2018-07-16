@@ -381,13 +381,21 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 
 	list_debug_log("list_update: begin\n");
 
+	if(l->head == NULL || l->tail == NULL) {
+		list_debug_log("list_update: list is NULL\n");
+		list_debug_log("list_update: end\n");
+	    return -1;
+	}
+
 	if(l->function->find == NULL) {
 		list_debug_log("list_update: find function is NULL\n");
+		list_debug_log("list_update: end\n");
 	    return -1;
 	}
 
 	if(l->function->compare == NULL) {
 	  list_debug_log("list_update: compare function is NULL\n");
+	  list_debug_log("list_update: end\n");
 	  return -1;
 	}
 
@@ -407,10 +415,18 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 
     if(found == NULL) {
     	list_debug_log("list_update: item not found\n");
+		list_debug_log("list_update: end\n");
     	return 0;
     }
 
 	list_debug_log("list_update: item found\n");
+
+	/* one item only */
+	if(l->head == l->tail) {
+		list_debug_log("list_update: one item only\n");
+		list_debug_log("list_update: end\n");
+		return 0;
+	}
 
     if(found == l->head) {
     	list_debug_log("list_update: item is head\n");
