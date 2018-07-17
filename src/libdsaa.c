@@ -425,7 +425,7 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 	if(l->head == l->tail) {
 		list_debug_log("list_update: one item only\n");
 		list_debug_log("list_update: end\n");
-		return 0;
+		return 1;
 	}
 
     if(found == l->head) {
