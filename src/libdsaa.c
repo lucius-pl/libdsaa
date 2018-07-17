@@ -153,50 +153,81 @@ int list_find(struct list *l, void* f) {
 
 int list_move(struct list *l, void* i, list_item_position p, void* v, void* d) {
 
+	list_debug_log("list_move: begin\n");
+
+	if(l->head == NULL || l->tail == NULL) {
+		list_debug_log("list_move: list is NULL\n");
+		list_debug_log("list_move: end\n");
+	    return -1;
+	}
+
     if(l->function->find == NULL) {
-	  return -1;
+	    list_debug_log("list_move: find function is NULL\n");
+		list_debug_log("list_move: end\n");
+    	return -1;
 	}
 
     struct list_item* item = l->head;
     while(item != NULL) {
         if(l->function->find(item->data, i) == 1) {
-
-        	if(item == l->head) {
-               if(p == list_item_last) {
-        	       l->head = item->next;
-        	       l->head->previous = NULL;
-               }
-        	} else if(item == l->tail) {
-        		if(p == list_item_first) {
-        		    l->tail = item->previous;
-        		    l->tail->next = NULL;
-        		}
-        	} else {
-        		item->previous->next = item->next;
-        		item->next->previous = item->previous;
-        	}
-
-        	if(p == list_item_last && item != l->tail) {
-               l->tail->next = item;
-               item->previous = l->tail;
-  	           l->tail = item;
-  	           l->tail->next = NULL;
-        	} else if (p == list_item_first && item != l->head) {
-        		l->head->previous = item;
-        		item->next = l->head;
-       		    l->head = item;
-       		    l->head->previous = NULL;
-        	}
-
     	    if(l->function->update != NULL) {
     	    	l->function->update(item->data, v, d);
     	    }
-
-    	    return 1;
-    	}
-    	item = item->next;
+    	    break;
+        }
+        item = item->next;
     }
-    return 0;
+
+    if(item == NULL) {
+    	list_debug_log("list_move: item not found\n");
+    	list_debug_log("list_move: end\n");
+    	return 0;
+    }
+
+	list_debug_log("list_move: item found\n");
+
+	/* one item only */
+	if(l->head == l->tail) {
+		list_debug_log("list_move: one item only\n");
+		list_debug_log("list_move: end\n");
+		return 1;
+	}
+
+	if(item == l->head) {
+	    list_debug_log("list_move: item is head\n");
+		if(p == list_item_last) {
+		   l->head = item->next;
+		   l->head->previous = NULL;
+	   }
+	} else if(item == l->tail) {
+		list_debug_log("list_move: item is tail\n");
+		if(p == list_item_first) {
+			l->tail = item->previous;
+			l->tail->next = NULL;
+		}
+	} else {
+		list_debug_log("list_move: item is between head and tail\n");
+		item->previous->next = item->next;
+		item->next->previous = item->previous;
+	}
+
+	if(p == list_item_last && item != l->tail) {
+	   l->tail->next = item;
+	   item->previous = l->tail;
+	   l->tail = item;
+	   l->tail->next = NULL;
+	   list_debug_log("list_move: item moved after tail\n");
+	} else if (p == list_item_first && item != l->head) {
+		l->head->previous = item;
+		item->next = l->head;
+		l->head = item;
+		l->head->previous = NULL;
+		list_debug_log("list_move: item moved before head\n");
+	}
+
+    list_debug_log("list_move: end\n");
+
+    return 1;
 }
 
 /*****************************************************************************/
