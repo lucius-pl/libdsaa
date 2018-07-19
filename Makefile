@@ -25,8 +25,9 @@ clean:
 	rm -fr ${BUILD_DIR}
 
 debug: CFLAGS += -DDEBUG -ggdb -O0
-debug: clean ${TARGET}
+debug: ${TARGET}
 
+.PHONY: $(OBJ_)
 
 install:
 	install -m 644 ${TARGET_} ${PREFIX}/lib
