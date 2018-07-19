@@ -1,8 +1,8 @@
 
-CC = gcc
+
 OBJ = libdsaa.o
 SRC = src/libdsaa.c
-CFLAGS = -O2 -fPIC -Wall
+CFLAGS = -fPIC -Wall
 LDFLAGS = -shared
 TARGET = libdsaa.so
 BUILD_DIR = build
@@ -11,6 +11,7 @@ PREFIX=/usr/local
 OBJ_ = $(patsubst %,${BUILD_DIR}/%,$(OBJ))
 TARGET_ = $(patsubst %,${BUILD_DIR}/%,$(TARGET))
 
+all: CFLAGS += -O2
 all: ${TARGET}
 
 ${TARGET}: $(OBJ_)
@@ -22,6 +23,10 @@ $(OBJ_): ${SRC}
 
 clean:
 	rm -fr ${BUILD_DIR}
+
+debug: CFLAGS += -DDEBUG -ggdb -O0
+debug: clean ${TARGET}
+
 
 install:
 	install -m 644 ${TARGET_} ${PREFIX}/lib

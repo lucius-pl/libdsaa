@@ -2,6 +2,8 @@
 #include "../include/libdsaa.h"
 
 #include <stdlib.h>
+
+#ifdef DEBUG
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -14,7 +16,6 @@
 #define DEBUG_LOG_LINE_SIZE 1000
 static unsigned short debug = 0;
 static int fdebug;
-
 
 /*****************************************************************************/
 
@@ -36,6 +37,8 @@ void list_debug_log(const char* format, ... ) {
 	 }
 }
 
+#endif
+
 /*****************************************************************************/
 
 void list_init(struct list* l, struct list_function* f) {
@@ -44,9 +47,11 @@ void list_init(struct list* l, struct list_function* f) {
     l->function = f;
     l->size = 0;
 
+#ifdef DEBUG
     if(debug) {
         fdebug = open(DEBUG_LOG, O_WRONLY | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH );
     }
+#endif
 }
 
 /*****************************************************************************/
@@ -153,17 +158,23 @@ int list_find(struct list *l, void* f) {
 
 int list_move(struct list *l, void* i, list_item_position p, void* v, void* d) {
 
+#ifdef DEBUG
 	list_debug_log("list_move: begin\n");
+#endif
 
 	if(l->head == NULL || l->tail == NULL) {
+#ifdef DEBUG
 		list_debug_log("list_move: list is NULL\n");
 		list_debug_log("list_move: end\n");
+#endif
 	    return -1;
 	}
 
     if(l->function->find == NULL) {
-	    list_debug_log("list_move: find function is NULL\n");
+#ifdef DEBUG
+    	list_debug_log("list_move: find function is NULL\n");
 		list_debug_log("list_move: end\n");
+#endif
     	return -1;
 	}
 
@@ -179,34 +190,45 @@ int list_move(struct list *l, void* i, list_item_position p, void* v, void* d) {
     }
 
     if(item == NULL) {
+#ifdef DEBUG
     	list_debug_log("list_move: item not found\n");
     	list_debug_log("list_move: end\n");
+#endif
     	return 0;
     }
 
+#ifdef DEBUG
 	list_debug_log("list_move: item found\n");
-
+#endif
 	/* one item only */
 	if(l->head == l->tail) {
+#ifdef DEBUG
 		list_debug_log("list_move: one item only\n");
 		list_debug_log("list_move: end\n");
+#endif
 		return 1;
 	}
 
 	if(item == l->head) {
-	    list_debug_log("list_move: item is head\n");
+#ifdef DEBUG
+		list_debug_log("list_move: item is head\n");
+#endif
 		if(p == list_item_last) {
 		   l->head = item->next;
 		   l->head->previous = NULL;
 	   }
 	} else if(item == l->tail) {
+#ifdef DEBUG
 		list_debug_log("list_move: item is tail\n");
+#endif
 		if(p == list_item_first) {
 			l->tail = item->previous;
 			l->tail->next = NULL;
 		}
 	} else {
+#ifdef DEBUG
 		list_debug_log("list_move: item is between head and tail\n");
+#endif
 		item->previous->next = item->next;
 		item->next->previous = item->previous;
 	}
@@ -216,16 +238,22 @@ int list_move(struct list *l, void* i, list_item_position p, void* v, void* d) {
 	   item->previous = l->tail;
 	   l->tail = item;
 	   l->tail->next = NULL;
+#ifdef DEBUG
 	   list_debug_log("list_move: item moved after tail\n");
+#endif
 	} else if (p == list_item_first && item != l->head) {
 		l->head->previous = item;
 		item->next = l->head;
 		l->head = item;
 		l->head->previous = NULL;
+#ifdef DEBUG
 		list_debug_log("list_move: item moved before head\n");
+#endif
 	}
 
+#ifdef DEBUG
     list_debug_log("list_move: end\n");
+#endif
 
     return 1;
 }
@@ -352,9 +380,11 @@ int list_print(struct list *l, list_item_position p) {
 int list_release(struct list *l) {
 	struct list_item* item;
 
+#ifdef DEBUG
 	if(debug && fdebug > 0) {
 	    close(fdebug);
 	}
+#endif
 
 	if(l->head == NULL) {
 	    return -1;
@@ -410,24 +440,32 @@ int list_get_find(struct list *l, void* f, void** list_data) {
 
 int list_update(struct list *l, void* i, void* v, void* d) {
 
+#ifdef DEBUG
 	list_debug_log("list_update: begin\n");
+#endif
 
 	if(l->head == NULL || l->tail == NULL) {
+#ifdef DEBUG
 		list_debug_log("list_update: list is NULL\n");
 		list_debug_log("list_update: end\n");
+#endif
 	    return -1;
 	}
 
 	if(l->function->find == NULL) {
+#ifdef DEBUG
 		list_debug_log("list_update: find function is NULL\n");
 		list_debug_log("list_update: end\n");
+#endif
 	    return -1;
 	}
 
 	if(l->function->compare == NULL) {
-	  list_debug_log("list_update: compare function is NULL\n");
-	  list_debug_log("list_update: end\n");
-	  return -1;
+#ifdef DEBUG
+		list_debug_log("list_update: compare function is NULL\n");
+	    list_debug_log("list_update: end\n");
+#endif
+	    return -1;
 	}
 
 	struct list_item* found = NULL;
@@ -436,7 +474,9 @@ int list_update(struct list *l, void* i, void* v, void* d) {
         if(l->function->find(item->data, i) == 1) {
         	if(l->function->update != NULL) {
         		l->function->update(item->data, v, d);
+#ifdef DEBUG
         		list_debug_log("list_update: item updated\n");
+#endif
         	}
         	found = item;
         	break;
@@ -445,22 +485,29 @@ int list_update(struct list *l, void* i, void* v, void* d) {
     }
 
     if(found == NULL) {
+#ifdef DEBUG
     	list_debug_log("list_update: item not found\n");
 		list_debug_log("list_update: end\n");
+#endif
     	return 0;
     }
 
+#ifdef DEBUG
 	list_debug_log("list_update: item found\n");
-
+#endif
 	/* one item only */
 	if(l->head == l->tail) {
+#ifdef DEBUG
 		list_debug_log("list_update: one item only\n");
 		list_debug_log("list_update: end\n");
+#endif
 		return 1;
 	}
 
     if(found == l->head) {
+#ifdef DEBUG
     	list_debug_log("list_update: item is head\n");
+#endif
     	item = l->head->next;
     	while(item != NULL ) {
     		if(l->function->compare(item->data, found->data) >= 0) {
@@ -478,7 +525,9 @@ int list_update(struct list *l, void* i, void* v, void* d) {
     		found->next = NULL;
     		found->previous = l->tail;
     		l->tail = found;
+#ifdef DEBUG
     		list_debug_log("list_update: item moved after tail\n");
+#endif
     	} else {
     		/* after one element after head */
     		if(item != l->head->next) {
@@ -490,12 +539,15 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 
     	    	item->previous->next = found;
     	    	item->previous = found;
-
+#ifdef DEBUG
     	    	list_debug_log("list_update: item moved after one element after head\n");
+#endif
     		}
     	}
     } else if (found == l->tail) {
+#ifdef DEBUG
     	list_debug_log("list_update: item is tail\n");
+#endif
     	item = l->tail->previous;
     	while(item != NULL ) {
     	    if(l->function->compare(item->data, found->data) <= 0) {
@@ -513,7 +565,9 @@ int list_update(struct list *l, void* i, void* v, void* d) {
         	found->previous = NULL;
     	    found->next = l->head;
     	    l->head = found;
+#ifdef DEBUG
     	    list_debug_log("list_update: item moved before head\n");
+#endif
     	} else {
     		/* before one element before tail */
     	    if(item != l->tail->previous) {
@@ -525,12 +579,15 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 
     	    	item->next->previous = found;
     	    	item->next = found;
-
+#ifdef DEBUG
     	    	list_debug_log("list_update: item moved before one element before tail\n");
+#endif
     	    }
     	}
     } else {
+#ifdef DEBUG
     	list_debug_log("list_update: item is between head and tail\n");
+#endif
     	/* up */
     	if(l->function->compare(found->data, found->next->data) > 0) {
     		item = found->next;
@@ -551,9 +608,9 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 				found->next = NULL;
 				found->previous = l->tail;
 				l->tail = found;
-
+#ifdef DEBUG
 				list_debug_log("list_update: item moved after tail\n");
-
+#endif
 			} else {
 				/* after one element after found */
 
@@ -565,8 +622,9 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 
     			item->previous->next = found;
 				item->previous = found;
-
+#ifdef DEBUG
 				list_debug_log("list_update: item moved after one element after found\n");
+#endif
 			}
 
     	/* down */
@@ -588,8 +646,9 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 				found->previous = NULL;
 				found->next = l->head;
 				l->head = found;
-
+#ifdef DEBUG
 				list_debug_log("list_update: item moved before head\n");
+#endif
 			} else {
 	    		/* before one element before found */
 
@@ -600,14 +659,15 @@ int list_update(struct list *l, void* i, void* v, void* d) {
 	    	    found->next = item->next;
 	    	    item->next->previous = found;
 	    	    item->next = found;
-
+#ifdef DEBUG
 	    	    list_debug_log("list_update: item moved before one element before found\n");
+#endif
 	    	}
     	}
     }
-
+#ifdef DEBUG
     list_debug_log("list_update: end\n");
-
+#endif
     return 1;
 }
 
